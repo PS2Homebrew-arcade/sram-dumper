@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "*.make": "makefile",
+        "typeinfo": "c",
+        "irx_imports.h": "c",
+        "acflash_common.h": "c",
+        "stdint.h": "c",
+        "stdio.h": "c",
+        "acsram_dumper.h": "c",
+        "acsram_rpc.h": "c",
+        "exceptions.h": "c"
+    }
+}
