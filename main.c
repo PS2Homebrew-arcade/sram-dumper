@@ -74,7 +74,7 @@ EXTERN_MODULE(iomanX_irx);
 #define MODULE_OK(id, ret) (id >= 0 && ret == 0)
 #define INFORM(x) scr_setfontcolor(MODULE_OK(x.id, x.ret) ? 0x00cc00 : 0x0000cc);scr_printf("\t %s: id:%d ret:%d %s", #x, x.id, x.ret, MODULE_OK(x.id, x.ret) ? "(OK)\r" : "(ERR)\n")
 int loadusb();
-int dumpsram(const char* path);
+int dumpsram();
 int checkfile(const char* path);
 
 char ROMVER[15];
@@ -120,7 +120,7 @@ int main(int argc, char** argv) {
     }
     if (loadmodules() == 0) {
         scr_setfontcolor(0xffffff);
-        dumpsram("sram.bin");
+        dumpsram();
     } else printf("error on loadmodules()\n");
     scr_printf("\n");
     for (int i = 80; i > 0; i--, sleep(1))
@@ -216,8 +216,14 @@ int loadmodules() {
     return 0;
 }
 
-int dumpsram(const char* path) {
+int dumpsram() {
+    char path[64] = "sram0.bin";
     scr_printf("\n\t>>> reading SRAM...\n");
+    for (int i = 0; i < 15; i++) {
+        path[4] = '0' + i;
+        if (!checkfile(path)) break;
+    }
+    
     printf("\n\tdumping SRAM to '%s'\n", path);
     int r, fd;
     int readed = 0, written;
@@ -226,7 +232,6 @@ int dumpsram(const char* path) {
         readed += dump_sram(&SRAM[readed], ACSRAM_DUMP_MAXCHUNK_SIZE, readed);
         scr_printf("  %04X", readed);
         genericgaugepercentcalc(readed, SRAM_SIZE);
-        sleep(1);
     }
     scr_printf("\n\tSRAM Read complete\n");
     
@@ -241,7 +246,7 @@ int dumpsram(const char* path) {
             scr_printf("\tI/O ERROR: written 0x%X bytes to file instead of 0x%X\n", written, SRAM_SIZE);
             r = -1;
         } else {
-            scr_printf("\tfile dumped!\n\tremember: running this program again overwrites the dump\n");
+            scr_printf("\tfile dumped!\n");
             r = 0;
         }
         close(fd);

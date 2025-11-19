@@ -21,6 +21,7 @@ EE_CFLAGS += -fdata-sections -ffunction-sections -DNEWLIB_PORT_AWARE
 EE_LDFLAGS += -Wl,--gc-sections
 EE_LIBS += -liopreboot -ldebug -lpatches -lfileXio -lcdvd -lpadx
 
+all: $(DEPENDENCIES) $(EE_BIN) 
 
 ifeq ($(DEBUG), 1)
   EXCEPTION_HANDLER = 1
@@ -35,9 +36,7 @@ ifeq ($(EXCEPTION_HANDLER),1)
   DEPENDENCIES += exceptionman/libexceptionman.a
 exceptionman/libexceptionman.a: exceptionman/
 	$(MAKE) -C $<
-
 endif
-all: $(DEPENDENCIES) $(EE_BIN) 
 
 clean:
 	rm -rf $(EE_OBJS) $(EE_BIN)
