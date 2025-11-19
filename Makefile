@@ -11,12 +11,12 @@
 #                                                                       
 #
 
-EE_BIN = ACSRAM_DUMPER.ELF
+EE_BIN ?= ACSRAM_DUMPER.ELF
 EE_OBJS_DIR = embed/
 EE_OBJS = main.o modelname.o ioprp.o pad.o iop/acsram_dumper/ee_rpc.o \
 	$(addprefix $(EE_OBJS_DIR), usbd.o bdm.o bdmfs_fatfs.o usbmass_bd.o fileXio.o iomanX.o acsram.o acsram_dumper.o mmceman.o)
 
-DEBUG ?= 1
+DEBUG ?= 0
 EE_CFLAGS += -fdata-sections -ffunction-sections -DNEWLIB_PORT_AWARE
 EE_LDFLAGS += -Wl,--gc-sections
 EE_LIBS += -liopreboot -ldebug -lpatches -lfileXio -lcdvd -lpadx
