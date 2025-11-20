@@ -93,7 +93,7 @@ int main(int argc, char** argv) {
     scr_printf("\n\n");
     scr_centerputs(" Namco System 246/256 SRAM dumper ", '=');
     scr_centerputs(" Coded by El_isra ", ' ');
-    scr_centerputs(" https://github.com/israpps/acflash-dumper ", ' ');
+    scr_centerputs(" https://github.com/PS2Homebrew-arcade/sram-dumper ", ' ');
     scr_printf("\tROMVER:        %s\n", ROMVER);
     ModelNameInit();
     scr_printf("\tConsole model: %s\n", ModelNameGet());
