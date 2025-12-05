@@ -55,13 +55,17 @@ typedef struct {
     int id;
     int ret;
 } modinfo_t;
-modinfo_t mmceman, sio2man, mcman, mcserv, padman, usbd, bdm, fatfs, usbmass, fileXio, iomanX, sec_checker, acsram, acsram_dumper;
+modinfo_t mmceman, sio2man, mcman, mcserv, padman, usbd, bdm, fatfs, 
+    usbmass, fileXio, iomanX, sec_checker, acsram, acsram_dumper,
+    accore, acram;
 
 #define EXTERN_MODULE(_irx) extern unsigned char _irx[]; extern unsigned int size_##_irx
 EXTERN_MODULE(ioprp);
 EXTERN_MODULE(mmceman_irx);
 EXTERN_MODULE(acsram_dumper_irx);
 EXTERN_MODULE(acsram_irx);
+EXTERN_MODULE(accore_irx);
+EXTERN_MODULE(acram_irx);
 EXTERN_MODULE(usbd_irx);
 EXTERN_MODULE(bdm_irx);
 EXTERN_MODULE(bdmfs_fatfs_irx);
@@ -204,8 +208,10 @@ int loadmodules() {
     }
     mmceman.id = LOADMODULE(mmceman_irx, &mmceman.ret);
     INFORM(mmceman);
-    acsram.id = LOADMODULE(acsram_irx, &acsram.ret);
-    INFORM(acsram);
+    
+    accore.id = LOADMODULEFILE("host:ACCORE", &accore.ret); INFORM(accore);
+    acram.id = LOADMODULE(acram_irx, &acram.ret); INFORM(acram);
+    acsram.id = LOADMODULE(acsram_irx, &acsram.ret); INFORM(acsram);
     acsram_dumper.id = LOADMODULE(acsram_dumper_irx, &acsram_dumper.ret);
     INFORM(acsram_dumper);
     if (acsram_dumper_init() != 0) {
@@ -217,6 +223,7 @@ int loadmodules() {
 }
 
 int dumpsram() {
+#ifndef DUMP_SRAM
     char path[64] = "sram0.bin";
     scr_printf("\n\t>>> reading SRAM...\n");
     for (int i = 0; i < 15; i++) {
@@ -235,9 +242,6 @@ int dumpsram() {
     }
     scr_printf("\n\tSRAM Read complete\n");
     
-#ifndef NO_HEXDUMP
-    hexdump(SRAM, sizeof(SRAM), 1);
-#endif
     fd = open(path, O_WRONLY|O_CREAT|O_TRUNC);
     scr_printf("\tdumping SRAM to file '%s'\n", path);
     if (fd > 0) {
@@ -254,6 +258,16 @@ int dumpsram() {
         scr_printf("\tI/O ERROR: Could not open '%s'\n", path);
         r = -1;
     }
+#endif
+    scr_printf("\tChecking ACRAM status\n");
+    struct CheckAcram acr = check_acram(NULL);
+    scr_printf("\tACRAM Checked:\n");
+    scr_printf("\tACRAM[32MB]: wr: %08lX rd:%08lX res:%ld\n",
+        acr.ram32_write_res, acr.ram32_read_res, acr.ram32_result
+    );
+    scr_printf("\tACRAM[64MB]: wr: %08lX rd:%08lX res:%ld\n",
+        acr.ram64_write_res, acr.ram64_read_res, acr.ram64_result
+    );
     return r;
 }
 

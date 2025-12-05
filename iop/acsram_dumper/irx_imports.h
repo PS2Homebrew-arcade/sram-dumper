@@ -4,6 +4,7 @@
 #include "irx.h"
 /* Please keep these in alphabetical order!  */
 #include "loadcore.h"
+#include "acram.h"
 #include "acsram.h"
 #include "sifrpc-common.h"
 #include "sifcmd.h"

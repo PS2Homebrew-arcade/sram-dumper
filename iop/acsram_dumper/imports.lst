@@ -2,12 +2,23 @@ stdio_IMPORTS_start
 I_printf
 stdio_IMPORTS_end
 
+sysclib_IMPORTS_start
+I_strcmp
+I_memset
+sysclib_IMPORTS_end
+
 acsram_IMPORTS_start
 I_acSramRead
 #ifdef WRITE_SRAM
 I_acSramWrite
 #endif
 acsram_IMPORTS_end
+
+acram_IMPORTS_start
+I_acRamSetup
+I_acRamRead
+I_acRamWrite
+acram_IMPORTS_end
 
 // RPC
 sifcmd_IMPORTS_start
@@ -26,4 +37,6 @@ thbase_IMPORTS_start
 I_CreateThread
 I_StartThread
 I_GetThreadId
+I_WakeupThread
+I_SleepThread
 thbase_IMPORTS_end

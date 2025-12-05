@@ -74,3 +74,26 @@ int dump_sram(void* buf, uint32_t readsize, uint32_t off) {
     else printf("%s: not copying result, error on RPC or output buf is NULL (%d|%d)\n", __func__, pkt.result == readsize, buf != NULL);
     return pkt.result;
 }
+
+struct CheckAcram check_acram(int* perr) {
+    printf("detecting ACRAM capabilities...\n");
+    struct CheckAcram ret = {
+        -0x80, -0x80, -0x80, //RAM32 write_res, read_res, result
+        -0x80, -0x80, -0x80, //RAM64 write_res, read_res, result
+    };
+    if (SifCallRpc(&AcSRAMRPC, ACRAM_CHECK_CAPACITY, 0, RPC_BUFPARAM(ret), RPC_BUFPARAM(ret), NULL, NULL) < 0)
+    {
+        DPRINTF("%s: RPC ERROR\n", __FUNCTION__);
+        if (perr) *perr = -SCE_ECALLMISS;
+        return ret;
+    }
+    if (perr) *perr = 0;
+    
+    printf("ACRAM Checked:\n"
+        "ACRAM[32MB]: wr: %08lX rd:%08lX res:%ld\n"
+        "ACRAM[64MB]: wr: %08lX rd:%08lX res:%ld\n",
+        ret.ram32_write_res, ret.ram32_read_res, ret.ram32_result,
+        ret.ram64_write_res, ret.ram64_read_res, ret.ram64_result
+    );
+    return ret;
+}

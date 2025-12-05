@@ -14,5 +14,11 @@
 #include "acsram_rpc.h"
 #include <errno.h>
 
+// Initializes the RPC service
 int acsram_dumper_init(void);
+
+//extracts the SRAM memory into the buffer
 int dump_sram(void* buf, uint32_t readsize, uint32_t off);
+
+//Checks the size of the ACRAM memory
+struct CheckAcram check_acram(int* perr);
