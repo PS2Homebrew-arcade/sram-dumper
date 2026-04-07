@@ -7,7 +7,7 @@
  *    \____/\_| \_\_| |_/\_|  |_/  |___/  \___/\_|  |_/\_|   \____/\_| \_|
  *                                                                        
  *  Namco System 2x6 SRAM dumper
- *  Copyright (c) 2025 Matias Israelson - MIT license    
+ *  Copyright (c) 2026 Matias Israelson - MIT license    
  *                                                                        
  */
 
@@ -18,6 +18,7 @@
 #include <kernel.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <iopheap.h>
 #include <errno.h>
 #include <stdint.h>
@@ -55,7 +56,7 @@ typedef struct {
     int id;
     int ret;
 } modinfo_t;
-modinfo_t mmceman, sio2man, mcman, mcserv, padman, usbd, bdm, fatfs, usbmass, fileXio, iomanX, sec_checker, acsram, acsram_dumper;
+modinfo_t mmceman, sio2man, mcman, mcserv, padman, usbd, bdm, fatfs, usbmass, fileXio, iomanX, sec_checker, acsram, acsram_dumper, fpga;
 
 #define EXTERN_MODULE(_irx) extern unsigned char _irx[]; extern unsigned int size_##_irx
 EXTERN_MODULE(ioprp);
@@ -79,6 +80,7 @@ int checkfile(const char* path);
 
 char ROMVER[15];
 int loadmodules();
+bool file_exists(const char* F);
 
 int main(int argc, char** argv) {
     sio_puts("# startup services");
@@ -94,6 +96,7 @@ int main(int argc, char** argv) {
     scr_centerputs(" Namco System 246/256 SRAM dumper ", '=');
     scr_centerputs(" Coded by El_isra ", ' ');
     scr_centerputs(" https://github.com/PS2Homebrew-arcade/sram-dumper ", ' ');
+    scr_printf("\tVERSION: v%d.%d.%d\n", MAJOR, MINOR, PATCH);
     scr_printf("\tROMVER:        %s\n", ROMVER);
     ModelNameInit();
     scr_printf("\tConsole model: %s\n", ModelNameGet());
@@ -118,6 +121,17 @@ int main(int argc, char** argv) {
         //scr_printf("\tFailed to load fileXio. aborting dump...\n");
         //goto tosleep;
     }
+        scr_setfontcolor(0x00ffff);
+    if (!file_exists("nofpga.opt")) {
+        if (file_exists("mc0:ACFPGALD") && file_exists("mc0:FPGA")) {
+        scr_setfontcolor(0x00F000);
+        scr_printf("\t# ACFPGA driver found. uploading...\n");
+        fpga.id = LOADMODULEFILE("rom0:DAEMON", &fpga.ret);
+        scr_printf("\t# [ACFPGALD]: id:%d, ret:%d\n", fpga.id, fpga.ret);
+        scr_setfontcolor(0xffffff);
+        } else scr_printf("\t# FPGA upload skipped due to missing files\n");
+    } else scr_printf("\t# FPGA upload skipped due to lock token\n");
+
     if (loadmodules() == 0) {
         scr_setfontcolor(0xffffff);
         dumpsram();
@@ -352,4 +366,13 @@ void genericgauge (float progress) {
     }
 
     scr_printf("]\r");
+}
+
+bool file_exists(const char* F) {
+    int fd;
+    if ((fd = open(F, O_RDONLY)) >= 0) {
+        close(fd);
+        return true;
+    }
+    return false;
 }
